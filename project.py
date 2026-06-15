@@ -263,3 +263,91 @@ def print_tasks(project):
         for t in project.tasks:
             print(t)
         print()
+
+# COMMAND HANDLERS
+
+def cmd_add_user(args):
+    users = load_data()
+    # Check for duplicate email
+    for u in users:
+        if u.email == args.email:
+            print(f"Error: A user with email '{args.email}' already exists.")
+            return
+    user = User(args.name, args.email)
+    users.append(user)
+    save_data(users)
+    print(f"✅ User '{args.name}' added with ID {user.user_id}.")
+
+
+def cmd_list_users(args):
+    users = load_data()
+    print_users(users)
+
+
+def cmd_add_project(args):
+    users = load_data()
+    user = find_user(users, args.user_id)
+    if not user:
+        print(f"Error: No user with ID {args.user_id}.")
+        return
+    project = Project(args.title, args.description, args.due_date)
+    user.add_project(project)
+    save_data(users)
+    print(f"✅ Project '{args.title}' added to {user.name} (Project ID: {project.project_id}).")
+
+
+def cmd_list_projects(args):
+    users = load_data()
+    user = find_user(users, args.user_id)
+    if not user:
+        print(f"Error: No user with ID {args.user_id}.")
+        return
+    print_projects(user)
+
+
+def cmd_add_task(args):
+    users = load_data()
+    project = find_project(users, args.project_id)
+    if not project:
+        print(f"Error: No project with ID {args.project_id}.")
+        return
+    task = Task(args.title, args.assigned_to)
+    project.add_task(task)
+    save_data(users)
+    print(f"✅ Task '{args.title}' added to project '{project.title}' (Task ID: {task.task_id}).")
+
+
+def cmd_list_tasks(args):
+    users = load_data()
+    project = find_project(users, args.project_id)
+    if not project:
+        print(f"Error: No project with ID {args.project_id}.")
+        return
+    print_tasks(project)
+
+
+def cmd_complete_task(args):
+    users = load_data()
+    task = find_task(users, args.task_id)
+    if not task:
+        print(f"Error: No task with ID {args.task_id}.")
+        return
+    task.mark_complete()
+    save_data(users)
+    print(f"✅ Task '{task.title}' marked as complete!")
+
+
+def cmd_edit_project(args):
+    users = load_data()
+    project = find_project(users, args.project_id)
+    if not project:
+        print(f"Error: No project with ID {args.project_id}.")
+        return
+    if args.title:
+        project.title = args.title
+    if args.description:
+        project.description = args.description
+    if args.due_date:
+        project.due_date = args.due_date
+    save_data(users)
+    print(f"✅ Project {args.project_id} updated.")
