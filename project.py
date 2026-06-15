@@ -150,7 +150,7 @@ class Task:
     def from_dict(cls, data):
         return cls(data["title"], data["assigned_to"], data["task_id"], data["status"])
 
-# FILE I/O HELPERS
+# FILE I/O 
 
 def load_data():
     """Load all users (and their projects/tasks) from the JSON file."""
@@ -170,3 +170,96 @@ def save_data(users):
     """Save all users to the JSON file."""
     with open(DATA_FILE, "w") as f:
         json.dump([u.to_dict() for u in users], f, indent=2)
+
+# LOOKUP HELPERS
+
+def find_user(users, user_id):
+    for u in users:
+        if u.user_id == user_id:
+            return u
+    return None
+
+
+def find_project(users, project_id):
+    for u in users:
+        for p in u.projects:
+            if p.project_id == project_id:
+                return p
+    return None
+
+
+def find_task(users, task_id):
+    for u in users:
+        for p in u.projects:
+            for t in p.tasks:
+                if t.task_id == task_id:
+                    return t
+    return None
+
+
+# DISPLAY HELPERS
+
+
+def print_users(users):
+    if not users:
+        print("No users found.")
+        return
+
+    if HAS_RICH:
+        table = Table(title="Users")
+        table.add_column("ID", style="cyan")
+        table.add_column("Name", style="green")
+        table.add_column("Email")
+        table.add_column("Projects")
+        for u in users:
+            table.add_row(str(u.user_id), u.name, u.email, str(len(u.projects)))
+        console.print(table)
+    else:
+        print("\n--- Users ---")
+        for u in users:
+            print(u)
+        print()
+
+
+def print_projects(user):
+    if not user.projects:
+        print(f"No projects for {user.name}.")
+        return
+
+    if HAS_RICH:
+        table = Table(title=f"Projects for {user.name}")
+        table.add_column("ID", style="cyan")
+        table.add_column("Title", style="green")
+        table.add_column("Description")
+        table.add_column("Due Date")
+        table.add_column("Tasks")
+        for p in user.projects:
+            table.add_row(str(p.project_id), p.title, p.description, p.due_date, str(len(p.tasks)))
+        console.print(table)
+    else:
+        print(f"\n--- Projects for {user.name} ---")
+        for p in user.projects:
+            print(p)
+        print()
+
+
+def print_tasks(project):
+    if not project.tasks:
+        print(f"No tasks in project '{project.title}'.")
+        return
+
+    if HAS_RICH:
+        table = Table(title=f"Tasks in '{project.title}'")
+        table.add_column("ID", style="cyan")
+        table.add_column("Title", style="green")
+        table.add_column("Assigned To")
+        table.add_column("Status")
+        for t in project.tasks:
+            status_color = "green" if t.status == "complete" else "yellow"
+            table.add_row(str(t.task_id), t.title, t.assigned_to, f"[{status_color}]{t.status}[/{status_color}]")
+        console.print(table)
+    else:
+        print(f"\n--- Tasks in '{project.title}' ---")
+        for t in project.tasks:
+            print(t)
+        print()
