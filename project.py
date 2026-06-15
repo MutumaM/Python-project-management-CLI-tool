@@ -149,3 +149,24 @@ class Task:
     @classmethod
     def from_dict(cls, data):
         return cls(data["title"], data["assigned_to"], data["task_id"], data["status"])
+
+# FILE I/O HELPERS
+
+def load_data():
+    """Load all users (and their projects/tasks) from the JSON file."""
+    if not os.path.exists(DATA_FILE):
+        return []
+
+    try:
+        with open(DATA_FILE, "r") as f:
+            raw = json.load(f)
+            return [User.from_dict(u) for u in raw]
+    except (json.JSONDecodeError, KeyError) as e:
+        print(f"Warning: Could not load data — {e}")
+        return []
+
+
+def save_data(users):
+    """Save all users to the JSON file."""
+    with open(DATA_FILE, "w") as f:
+        json.dump([u.to_dict() for u in users], f, indent=2)
