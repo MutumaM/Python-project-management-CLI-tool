@@ -2,8 +2,7 @@
 
 import json
 import os
-import argparse
-from datetime import datetime
+import argparse 
 
 # Try to import rich for pretty output, fallback to plain print if not installed
 try:
