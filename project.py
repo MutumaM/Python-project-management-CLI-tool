@@ -351,3 +351,72 @@ def cmd_edit_project(args):
         project.due_date = args.due_date
     save_data(users)
     print(f"✅ Project {args.project_id} updated.")
+
+# CLI SETUP WITH ARGPARSE
+
+def main():
+    parser = argparse.ArgumentParser(
+        description="📋 Project Management CLI Tool",
+        formatter_class=argparse.RawTextHelpFormatter
+    )
+    subparsers = parser.add_subparsers(dest="command", help="Available commands")
+
+    # add-user 
+    p_add_user = subparsers.add_parser("add-user", help="Add a new user")
+    p_add_user.add_argument("--name", required=True, help="User's full name")
+    p_add_user.add_argument("--email", required=True, help="User's email address")
+    p_add_user.set_defaults(func=cmd_add_user)
+
+    # list-users 
+    p_list_users = subparsers.add_parser("list-users", help="List all users")
+    p_list_users.set_defaults(func=cmd_list_users)
+
+    # add-project 
+    p_add_project = subparsers.add_parser("add-project", help="Add a project to a user")
+    p_add_project.add_argument("--user-id", required=True, type=int, help="ID of the user")
+    p_add_project.add_argument("--title", required=True, help="Project title")
+    p_add_project.add_argument("--description", required=True, help="Short project description")
+    p_add_project.add_argument("--due-date", required=True, help="Due date (e.g. 2025-12-31)")
+    p_add_project.set_defaults(func=cmd_add_project)
+
+    # list-projects 
+    p_list_projects = subparsers.add_parser("list-projects", help="List projects for a user")
+    p_list_projects.add_argument("--user-id", required=True, type=int, help="ID of the user")
+    p_list_projects.set_defaults(func=cmd_list_projects)
+
+    # edit-project 
+    p_edit_project = subparsers.add_parser("edit-project", help="Edit a project's details")
+    p_edit_project.add_argument("--project-id", required=True, type=int, help="ID of the project")
+    p_edit_project.add_argument("--title", help="New title")
+    p_edit_project.add_argument("--description", help="New description")
+    p_edit_project.add_argument("--due-date", help="New due date")
+    p_edit_project.set_defaults(func=cmd_edit_project)
+
+    # --- add-task ---
+    p_add_task = subparsers.add_parser("add-task", help="Add a task to a project")
+    p_add_task.add_argument("--project-id", required=True, type=int, help="ID of the project")
+    p_add_task.add_argument("--title", required=True, help="Task title")
+    p_add_task.add_argument("--assigned-to", required=True, help="Person responsible for this task")
+    p_add_task.set_defaults(func=cmd_add_task)
+
+    # --- list-tasks ---
+    p_list_tasks = subparsers.add_parser("list-tasks", help="List tasks in a project")
+    p_list_tasks.add_argument("--project-id", required=True, type=int, help="ID of the project")
+    p_list_tasks.set_defaults(func=cmd_list_tasks)
+
+    # --- complete-task ---
+    p_complete_task = subparsers.add_parser("complete-task", help="Mark a task as complete")
+    p_complete_task.add_argument("--task-id", required=True, type=int, help="ID of the task")
+    p_complete_task.set_defaults(func=cmd_complete_task)
+
+    # Parse and run
+    args = parser.parse_args()
+
+    if args.command is None:
+        parser.print_help()
+    else:
+        args.func(args)
+
+
+if __name__ == "__main__":
+    main()
