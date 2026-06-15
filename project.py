@@ -29,3 +29,81 @@ class Person:
 
     def __str__(self):
         return self.name
+    
+class User(Person):
+    """A user of the system. Has an email and a list of projects."""
+
+    # Class-level ID counter
+    next_id = 1
+
+    def __init__(self, name, email, user_id=None):
+        super().__init__(name)
+        self._email = email  
+        self.user_id = user_id if user_id else User.next_id
+        User.next_id = max(User.next_id, self.user_id) + 1
+        self.projects = []  
+
+    # Property to control access to email
+    @property
+    def email(self):
+        return self._email
+
+    @email.setter
+    def email(self, value):
+        if "@" not in value:
+            raise ValueError("Email must contain '@'")
+        self._email = value
+
+    def add_project(self, project):
+        self.projects.append(project)
+
+    def __str__(self):
+        return f"[{self.user_id}] {self.name} <{self.email}> — {len(self.projects)} project(s)"
+
+    def to_dict(self):
+        return {
+            "user_id": self.user_id,
+            "name": self.name,
+            "email": self.email,
+            "projects": [p.to_dict() for p in self.projects]
+        }
+
+    @classmethod
+    def from_dict(cls, data):
+        user = cls(data["name"], data["email"], data["user_id"])
+        user.projects = [Project.from_dict(p) for p in data.get("projects", [])]
+        return user
+    
+class Project:
+    """A project belonging to a user. Has tasks."""
+
+    next_id = 1
+
+    def __init__(self, title, description, due_date, project_id=None):
+        self.title = title
+        self.description = description
+        self.due_date = due_date
+        self.project_id = project_id if project_id else Project.next_id
+        Project.next_id = max(Project.next_id, self.project_id) + 1
+        self.tasks = []  
+
+    def add_task(self, task):
+        self.tasks.append(task)
+
+    def __str__(self):
+        return f"[{self.project_id}] {self.title} (Due: {self.due_date}) — {len(self.tasks)} task(s)"
+
+    def to_dict(self):
+        return {
+            "project_id": self.project_id,
+            "title": self.title,
+            "description": self.description,
+            "due_date": self.due_date,
+            "tasks": [t.to_dict() for t in self.tasks]
+        }
+
+    @classmethod
+    def from_dict(cls, data):
+        project = cls(data["title"], data["description"], data["due_date"], data["project_id"])
+        project.tasks = [Task.from_dict(t) for t in data.get("tasks", [])]
+        return project
